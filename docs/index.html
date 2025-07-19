@@ -114,9 +114,16 @@
             return;
           }
 
+          if (encryptedText.value) {
+            if (!confirm("The encrypted text area is not empty. Do you want to overwrite it?")) {
+              return;
+            }
+          }
+
           // Simple encryption example (you should use a proper encryption library)
           const encrypted = btoa(unescape(encodeURIComponent(plainText.value)));
           encryptedText.value = encrypted;
+        //   alert("Text encrypted successfully!");
         });
 
         // Decrypt functionality
@@ -126,9 +133,16 @@
             return;
           }
 
+          if (plainText.value) {
+            if (!confirm("The plain text area is not empty. Do you want to overwrite it?")) {
+              return;
+            }
+          }
+
           // Simple decryption example (you should use a proper encryption library)
           const decrypted = decodeURIComponent(escape(atob(encryptedText.value)));
           plainText.value = decrypted;
+        //   alert("Text decrypted successfully!");
         });
 
         // Copy functionality
