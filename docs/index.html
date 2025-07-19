@@ -8,18 +8,39 @@
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <style>
-      .button-group {
-        margin: 20px 0;
-      }
-      .custom-btn {
-        margin-right: 10px;
-      }
       #plain-text,
       #encrypted-text {
         height: 150px;
         resize: vertical;
-        min-width: 100%;
+        width: 100%;
+      }
+      .textarea-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 5px;
+      }
+      .textarea-buttons {
+        display: flex;
+        gap: 5px;
+      }
+      .textarea-buttons button {
+        padding: 2px 5px;
+        font-size: 0.8rem;
+      }
+      .password-container {
+        position: relative;
+      }
+      .password-toggle {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        border: none;
+        background: none;
+        cursor: pointer;
       }
     </style>
   </head>
@@ -28,36 +49,44 @@
 
     <!-- Plaintext Area -->
     <div class="mb-4">
-      <label for="plain-text" class="form-label">Plain text</label>
+      <div class="textarea-header">
+        <label for="plain-text" class="form-label">Plain text</label>
+        <div class="textarea-buttons">
+          <button id="encryptBtn" class="btn btn-sm btn-primary">Encrypt</button>
+          <button class="btn btn-sm btn-success copy-btn" data-target="plain-text">Copy</button>
+          <button class="btn btn-sm btn-danger clear-btn" data-target="plain-text">Clear</button>
+        </div>
+      </div>
       <textarea id="plain-text" class="form-control"></textarea>
     </div>
 
     <!-- Middle Section -->
     <div class="row align-items-center mb-4">
       <div class="col-md-6">
-        <input
-          type="password"
-          class="form-control mb-2"
-          placeholder="Password"
-          id="password"
-        />
-
-        <div class="button-group">
-          <button id="encryptBtn" class="btn btn-primary custom-btn">
-            Encrypt
+        <div class="password-container">
+          <input
+            type="password"
+            class="form-control mb-2"
+            placeholder="Password"
+            id="password"
+          />
+          <button type="button" id="togglePassword" class="password-toggle">
+            <i class="bi bi-eye"></i>
           </button>
-          <button id="decryptBtn" class="btn btn-primary custom-btn">
-            Decrypt
-          </button>
-          <button id="copyBtn" class="btn btn-success custom-btn">Copy</button>
-          <button id="clearBtn" class="btn btn-danger custom-btn">Clear</button>
         </div>
       </div>
     </div>
 
     <!-- Encrypted Text Area -->
     <div class="mb-4">
-      <label for="encrypted-text" class="form-label">Encrypted text</label>
+      <div class="textarea-header">
+        <label for="encrypted-text" class="form-label">Encrypted text</label>
+        <div class="textarea-buttons">
+          <button id="decryptBtn" class="btn btn-sm btn-primary">Decrypt</button>
+          <button class="btn btn-sm btn-success copy-btn" data-target="encrypted-text">Copy</button>
+          <button class="btn btn-sm btn-danger clear-btn" data-target="encrypted-text">Clear</button>
+        </div>
+      </div>
       <textarea id="encrypted-text" class="form-control"></textarea>
     </div>
 
@@ -68,8 +97,15 @@
         const password = document.getElementById('password');
         const encryptBtn = document.getElementById('encryptBtn');
         const decryptBtn = document.getElementById('decryptBtn');
-        const copyBtn = document.getElementById('copyBtn');
-        const clearBtn = document.getElementById('clearBtn');
+        const togglePassword = document.getElementById('togglePassword');
+
+        // Toggle password visibility
+        togglePassword.addEventListener('click', function () {
+          const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+          password.setAttribute('type', type);
+          this.querySelector('i').classList.toggle('bi-eye');
+          this.querySelector('i').classList.toggle('bi-eye-slash');
+        });
 
         // Encrypt functionality
         encryptBtn.addEventListener('click', function () {
@@ -96,47 +132,37 @@
         });
 
         // Copy functionality
-        copyBtn.addEventListener('click', function () {
-          let textToCopy = "";
-          
-          if (!plainText.value && !encryptedText.value) {
-            alert("No text selected");
-            return;
-          }
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const textToCopy = document.getElementById(targetId).value;
 
-          // Determine which textarea to copy from
-          if (document.activeElement === plainText) {
-            textToCopy = plainText.value;
-          } else if (document.activeElement === encryptedText) {
-            textToCopy = encryptedText.value;
-          }
+            if (!textToCopy) {
+              alert("No text to copy");
+              return;
+            }
 
-          if (!textToCopy) {
-            alert("No text to copy");
-            return;
-          }
-
-          navigator.clipboard.writeText(textToCopy)
-            .then(() => {
-              alert("Copied successfully!");
-            })
-            .catch((err) => {
-              console.error("Failed to copy:", err);
-            });
+            navigator.clipboard.writeText(textToCopy)
+              .then(() => {
+                alert("Copied successfully!");
+              })
+              .catch((err) => {
+                console.error("Failed to copy:", err);
+              });
+          });
         });
 
         // Clear functionality
-        clearBtn.addEventListener('click', function () {
-          if (!plainText.value && !encryptedText.value) {
-            return;
-          }
+        document.querySelectorAll('.clear-btn').forEach(btn => {
+          btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const elementToClear = document.getElementById(targetId);
+            const elementName = targetId === 'plain-text' ? 'Plain text' : 'Encrypted text';
 
-          if (confirm("Are you sure you want to clear the text?")) {
-            plainText.value = "";
-            encryptedText.value = "";
-            // Clear the password input as well
-            password.value = "";
-          }
+            if (elementToClear.value && confirm(`Are you sure you want to clear the ${elementName}?`)) {
+              elementToClear.value = "";
+            }
+          });
         });
       });
     </script>
