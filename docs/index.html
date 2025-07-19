@@ -39,6 +39,7 @@
           type="password"
           class="form-control mb-2"
           placeholder="Password"
+          id="password"
         />
 
         <div class="button-group">
@@ -60,55 +61,54 @@
       <textarea id="encrypted-text" class="form-control"></textarea>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
-      $(document).ready(function () {
-        // Encrypt functionality
-        $("#encryptBtn").click(function () {
-          const plainText = $("#plain-text").val();
-          const password = $("input[type=password]").val();
+      document.addEventListener('DOMContentLoaded', function () {
+        const plainText = document.getElementById('plain-text');
+        const encryptedText = document.getElementById('encrypted-text');
+        const password = document.getElementById('password');
+        const encryptBtn = document.getElementById('encryptBtn');
+        const decryptBtn = document.getElementById('decryptBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const clearBtn = document.getElementById('clearBtn');
 
-          if (!plainText) {
+        // Encrypt functionality
+        encryptBtn.addEventListener('click', function () {
+          if (!plainText.value) {
             alert("Please enter some text to encrypt.");
             return;
           }
 
           // Simple encryption example (you should use a proper encryption library)
-          const encrypted = btoa(unescape(encodeURIComponent(plainText)));
-          $("#encrypted-text").val(encrypted);
+          const encrypted = btoa(unescape(encodeURIComponent(plainText.value)));
+          encryptedText.value = encrypted;
         });
 
         // Decrypt functionality
-        $("#decryptBtn").click(function () {
-          const encryptedText = $("#encrypted-text").val();
-          const password = $("input[type=password]").val();
-
-          if (!encryptedText) {
+        decryptBtn.addEventListener('click', function () {
+          if (!encryptedText.value) {
             alert("Please enter some text to decrypt.");
             return;
           }
 
           // Simple decryption example (you should use a proper encryption library)
-          const decrypted = decodeURIComponent(escape(atob(encryptedText)));
-          $("#plain-text").val(decrypted);
+          const decrypted = decodeURIComponent(escape(atob(encryptedText.value)));
+          plainText.value = decrypted;
         });
 
         // Copy functionality
-        $("#copyBtn").click(function () {
+        copyBtn.addEventListener('click', function () {
           let textToCopy = "";
-          const plainText = $("#plain-text").val();
-          const encryptedText = $("#encrypted-text").val();
-
-          if (!plainText && !encryptedText) {
+          
+          if (!plainText.value && !encryptedText.value) {
             alert("No text selected");
             return;
           }
 
           // Determine which textarea to copy from
-          if ($("#plain-text").is(":focus")) {
-            textToCopy = plainText;
-          } else if ($("#encrypted-text").is(":focus")) {
-            textToCopy = encryptedText;
+          if (document.activeElement === plainText) {
+            textToCopy = plainText.value;
+          } else if (document.activeElement === encryptedText) {
+            textToCopy = encryptedText.value;
           }
 
           if (!textToCopy) {
@@ -116,8 +116,7 @@
             return;
           }
 
-          navigator.clipboard
-            .writeText(textToCopy)
+          navigator.clipboard.writeText(textToCopy)
             .then(() => {
               alert("Copied successfully!");
             })
@@ -127,19 +126,16 @@
         });
 
         // Clear functionality
-        $("#clearBtn").click(function () {
-          const plainText = $("#plain-text").val();
-          const encryptedText = $("#encrypted-text").val();
-
-          if (!plainText && !encryptedText) {
+        clearBtn.addEventListener('click', function () {
+          if (!plainText.value && !encryptedText.value) {
             return;
           }
 
           if (confirm("Are you sure you want to clear the text?")) {
-            $("#plain-text").val("");
-            $("#encrypted-text").val("");
+            plainText.value = "";
+            encryptedText.value = "";
             // Clear the password input as well
-            $("input[type=password]").val("");
+            password.value = "";
           }
         });
       });
