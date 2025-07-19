@@ -9,6 +9,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
       #plain-text,
       #encrypted-text {
@@ -114,16 +115,20 @@
             return;
           }
 
+          if (!password.value) {
+            alert("Please enter a password for encryption.");
+            return;
+          }
+
           if (encryptedText.value) {
             if (!confirm("The encrypted text area is not empty. Do you want to overwrite it?")) {
               return;
             }
           }
 
-          // Simple encryption example (you should use a proper encryption library)
-          const encrypted = btoa(unescape(encodeURIComponent(plainText.value)));
+          // Encryption using CryptoJS
+          const encrypted = CryptoJS.AES.encrypt(plainText.value, password.value).toString();
           encryptedText.value = encrypted;
-        //   alert("Text encrypted successfully!");
         });
 
         // Decrypt functionality
@@ -133,16 +138,28 @@
             return;
           }
 
+          if (!password.value) {
+            alert("Please enter the password for decryption.");
+            return;
+          }
+
           if (plainText.value) {
             if (!confirm("The plain text area is not empty. Do you want to overwrite it?")) {
               return;
             }
           }
 
-          // Simple decryption example (you should use a proper encryption library)
-          const decrypted = decodeURIComponent(escape(atob(encryptedText.value)));
-          plainText.value = decrypted;
-        //   alert("Text decrypted successfully!");
+          // Decryption using CryptoJS
+          try {
+            const decrypted = CryptoJS.AES.decrypt(encryptedText.value, password.value).toString(CryptoJS.enc.Utf8);
+            if (decrypted) {
+              plainText.value = decrypted;
+            } else {
+              throw new Error('Decryption failed');
+            }
+          } catch (error) {
+            alert("Decryption failed. Please check your encrypted text and password.");
+          }
         });
 
         // Copy functionality
